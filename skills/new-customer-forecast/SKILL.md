@@ -1,5 +1,5 @@
 ---
-name: financial-forecast
+name: new-customer-forecast
 description: "Populate the New_Customer_Forecast_v2 tab in the Havn Financial Model spreadsheet. Reads 24 months of funnel data (ad spend, new customers, revenue, orders, AOV, CAC), calculates base metrics and seasonal indices, writes SUMPRODUCT formulas for historicals, and sets up the forecast framework. Triggers on any request involving 'financial forecast', 'new customer forecast', 'populate the forecast', 'Havn forecast', 'revenue forecast', 'forecast tab', 'forecast model', or 'run the forecast'. This skill prescribes the exact gsheets-mcp tool calls so Claude can execute immediately without tool discovery."
 ---
 
