@@ -1,0 +1,67 @@
+Here's the full tool reference:
+
+---
+
+**STORELEADS MCP SERVER — TOOL REFERENCE**
+
+**20 tools across 5 categories. All responses are payload-optimized (slim fields, 10 results default, compact JSON).**
+
+---
+
+**STORE SEARCH & DETAILS**
+
+1. **search_stores** — Search and filter eCommerce stores with 50+ combinable filters. Supports platform (Shopify, WooCommerce, BigCommerce, etc.), country, category, traffic range, revenue range, product count, employee count, apps installed, technologies, pricing plan, theme, location (city/state/region), language, currency, creation date, app spend, social presence, shipping carriers, and platform migration history. Returns 10 results per page by default (max 50). Results include: domain, merchant name, title, platform, plan, country, rank, monthly visits, monthly sales, product count, employee count, top categories, creation date, app spend, currency, and location.
+
+2. **get_store_details** — Get comprehensive details for a single store by domain name. Returns core metrics plus collapsed app names (top 15), technology names (top 15), contacts (type + value), description, rank percentile, pageviews, average price, variant/vendor counts, language, theme info, sales channels, previous platform, and OG image.
+
+3. **lookup_domain_by_name** — Find a store's domain from a company or brand name using fuzzy matching. Returns top 5 matches ranked by likelihood. Use when you know the brand but not the URL.
+
+---
+
+**APPS & TECHNOLOGIES**
+
+4. **search_apps** — Search eCommerce platform app stores (Shopify, BigCommerce, etc.) by platform, category, or keyword. Returns: name, token, platform, URL, rating, review count, install count, 30-day installs, 90-day installs, categories, launch date. 10 results per page default.
+
+5. **get_app_details** — Get full details for a specific app by identifier (format: platform.token, e.g. "shopify.klaviyo"). Returns: name, rating, install counts, categories, launch date, description, pricing, and plan breakdowns (name + price only).
+
+6. **get_app_reviews** — Get merchant reviews for a specific app. Returns: rating, body text, author, date, and locale. 10 reviews per page default.
+
+7. **get_technology_details** — Get details about a specific third-party technology tracked by StoreLeads (analytics tools, marketing pixels, CDNs, payment processors, etc.). Returns: name, description, install count, categories.
+
+8. **list_technologies** — List all third-party technologies StoreLeads tracks. Returns: name, install count, categories. 20 per page default.
+
+---
+
+**PRODUCTS & SOCIAL MEDIA**
+
+9. **get_store_products** — Get a store's product catalog. Returns: title, handle, price, vendor, product type, published date. 10 products per page default. Sortable by price, title, or published date.
+
+10. **get_social_media_account** — Get social media stats for a specific handle on a specific network. Supported networks: Instagram, TikTok, Twitter, Facebook, Pinterest, Snapchat, YouTube, Yelp. Returns: handle, network, followers, following, posts, category, 90-day follower change.
+
+11. **get_store_contacts** — Extract all contact info for a store. Returns: domain, merchant name, and contacts array with type (email/phone/twitter/facebook/instagram/pinterest/tiktok/youtube/snapchat/linkedin/yelp) and value.
+
+---
+
+**LIST MANAGEMENT (PROSPECT BUILDING)**
+
+12. **get_lists** — Get all StoreLeads lists on your account. Returns list names, IDs, and domain counts. Lists integrate with webhooks, CRMs (HubSpot, Salesforce), and export.
+
+13. **get_list_details** — Get domains in a specific list with their store data (same slim fields as search_stores). 10 per page default.
+
+14. **add_domains_to_list** — Add one or more domains to a list by domain name. Triggers any workflow webhooks attached to the list.
+
+15. **remove_domains_from_list** — Remove one or more domains from a list.
+
+16. **clear_list** — Remove ALL domains from a list (truncate). List itself is preserved.
+
+---
+
+**HISTORICAL DATA & EXPORT**
+
+17. **get_historical_store_data** — Get historical snapshots for a store. Track platform migrations, traffic trends, product count changes, rank changes over time. Returns: domain, platform, rank, monthly visits, monthly sales, product count, plan.
+
+18. **list_historical_labels** — List all available historical snapshot time periods. Use these labels with get_historical_store_data.
+
+19. **list_historical_domains** — List domains that have historical data available. 10 per page default.
+
+20. **export_stores** — Bulk export stores matching filter criteria (same filters as search_stores). Designed for large result sets. Auto-applies slim field set to prevent massive payloads.

@@ -1,0 +1,323 @@
+GOOGLE WORKSPACE MCP — COMPLETE TOOL REFERENCE (61 tools)
+==========================================================
+
+All tools require user_google_email (str) — handled automatically by auth middleware.
+
+
+GMAIL (8 tools)
+---------------
+
+1. search_gmail_messages
+   Search messages in Gmail. Returns Message IDs, Thread IDs, and links.
+   Params: query (str, required), page_size (int, default 10), page_token (str, optional)
+
+2. get_gmail_message_content
+   Get full content of a specific Gmail message (subject, sender, recipients, body).
+   Params: message_id (str, required)
+
+3. get_gmail_messages_content_batch
+   Get content of multiple Gmail messages in one batch. Max 25 per batch.
+   Params: message_ids (List[str], required), format ("full"|"metadata", default "full")
+
+4. get_gmail_attachment_content
+   Download the content of a specific email attachment.
+   Params: message_id (str, required), attachment_id (str, required)
+
+5. draft_gmail_message
+   Create a draft email. Supports replies, attachments, and Send As aliases.
+   Params: subject (str, required), body (str, required), body_format ("plain"|"html", default "plain"),
+           to (str, optional), cc (str, optional), bcc (str, optional),
+           from_name (str, optional), from_email (str, optional),
+           thread_id (str, optional), in_reply_to (str, optional), references (str, optional),
+           attachments (List[Dict], optional)
+
+6. get_gmail_thread_content
+   Get the complete conversation thread including all messages.
+   Params: thread_id (str, required)
+
+7. get_gmail_threads_content_batch
+   Get content of multiple Gmail threads in one batch. Max 25 per batch.
+   Params: thread_ids (List[str], required)
+
+8. list_gmail_labels
+   List all labels in the user's Gmail account.
+   Params: (none)
+
+
+GOOGLE DRIVE (9 tools)
+----------------------
+
+9. search_drive_files
+   Search for files and folders in Google Drive, including shared drives.
+   Params: query (str, required), page_size (int, default 10),
+           drive_id (str, optional), include_items_from_all_drives (bool, default True),
+           corpora (str, optional)
+
+10. get_drive_file_content
+    Get the content of a Drive file. Google Docs/Sheets/Slides exported as text/CSV. Office files parsed.
+    Params: file_id (str, required)
+
+11. get_drive_file_download_url
+    Get a download URL for a Drive file. Exports Google native files to PDF/DOCX/XLSX/CSV/PPTX.
+    Params: file_id (str, required), export_format (str, optional)
+
+12. list_drive_items
+    List files and folders in a Drive folder, supports shared drives.
+    Params: folder_id (str, default "root"), page_size (int, default 100),
+            drive_id (str, optional), include_items_from_all_drives (bool, default True),
+            corpora (str, optional)
+
+13. create_drive_file
+    Create a new file in Google Drive. Accepts direct content or a fileUrl.
+    Params: file_name (str, required), content (str, optional), folder_id (str, default "root"),
+            mime_type (str, default "text/plain"), fileUrl (str, optional)
+
+14. import_to_google_doc
+    Import a file (Markdown, DOCX, TXT, HTML, RTF, ODT) into Google Docs format.
+    Params: file_name (str, required), content (str, optional), file_path (str, optional),
+            file_url (str, optional), source_format (str, optional), folder_id (str, default "root")
+
+15. get_drive_file_permissions
+    Get detailed metadata about a Drive file including sharing permissions.
+    Params: file_id (str, required)
+
+16. check_drive_file_public_access
+    Search for a file by name and check if it has public link sharing enabled.
+    Params: file_name (str, required)
+
+17. get_drive_shareable_link
+    Get the shareable link for a Drive file or folder.
+    Params: file_id (str, required)
+
+
+GOOGLE DOCS (16 tools, including 4 comment tools)
+--------------------------------------------------
+
+18. search_docs
+    Search for Google Docs by name.
+    Params: query (str, required), page_size (int, default 10)
+
+19. get_doc_content
+    Get content of a Google Doc or Drive file (.docx). Supports tabs.
+    Params: document_id (str, required)
+
+20. list_docs_in_folder
+    List Google Docs within a specific Drive folder.
+    Params: folder_id (str, default "root"), page_size (int, default 100)
+
+21. update_google_doc
+    Update a Google Doc by appending, prepending, or replacing content. No character indices needed.
+    Params: document_id (str, required), content (str, required),
+            mode (str, default "append" — options: "append", "prepend", "replace")
+
+22. create_doc
+    Create a new Google Doc with optional initial content.
+    Params: title (str, required), content (str, default "")
+
+23. modify_doc_text
+    Insert/replace text and/or apply formatting at specific character positions.
+    Params: document_id (str, required), start_index (int, required), end_index (int, optional),
+            text (str, optional), bold (bool, optional), italic (bool, optional),
+            underline (bool, optional), font_size (int, optional), font_family (str, optional),
+            text_color (str, #RRGGBB optional), background_color (str, #RRGGBB optional)
+
+24. find_and_replace_doc
+    Find and replace text throughout a Google Doc.
+    Params: document_id (str, required), find_text (str, required),
+            replace_text (str, required), match_case (bool, default False)
+
+25. insert_doc_elements
+    Insert structural elements (tables, lists, page breaks) into a Doc.
+    Params: document_id (str, required), element_type (str, required), index (int, required),
+            rows (int, optional), columns (int, optional), list_type (str, optional), text (str, optional)
+
+26. insert_doc_image
+    Insert an image into a Doc from Drive or URL.
+    Params: document_id (str, required), image_source (str, required), index (int, required),
+            width (int, default 0), height (int, default 0)
+
+27. update_doc_headers_footers
+    Update headers or footers in a Google Doc.
+    Params: document_id (str, required), section_type (str, required), content (str, required),
+            header_footer_type (str, default "DEFAULT")
+
+28. batch_update_doc
+    Execute multiple document operations in a single atomic batch.
+    Params: document_id (str, required), operations (List[Dict], required)
+
+29. inspect_doc_structure
+    Find safe insertion points and understand document structure. Use before creating tables.
+    Params: document_id (str, required), detailed (bool, default False)
+
+30. create_table_with_data
+    Create a table and populate it with data. Call inspect_doc_structure first for the index.
+    Params: document_id (str, required), table_data (List[List[str]], required),
+            index (int, required), bold_headers (bool, default True)
+
+31. debug_table_structure
+    Debug tool for inspecting table layout, cell positions, and content.
+    Params: document_id (str, required), table_index (int, default 0)
+
+32. export_doc_to_pdf
+    Export a Google Doc to PDF and save to Drive.
+    Params: document_id (str, required), pdf_filename (str, optional), folder_id (str, optional)
+
+33. update_paragraph_style
+    Apply paragraph formatting: headings (H1-H6), bullets, numbered lists, alignment, spacing, indentation.
+    Params: document_id (str, required), start_index (int, required), end_index (int, required),
+            heading_level (int, optional), alignment (str, optional), line_spacing (float, optional),
+            indent_first_line (float, optional), indent_start (float, optional), indent_end (float, optional),
+            space_above (float, optional), space_below (float, optional),
+            list_type (str, optional), list_nesting_level (int, optional)
+
+34. read_document_comments
+    Read all comments from a Google Document.
+    Params: document_id (str, required)
+
+35. create_document_comment
+    Create a new comment on a Google Document.
+    Params: document_id (str, required), comment_content (str, required)
+
+36. reply_to_document_comment
+    Reply to a specific comment in a Google Document.
+    Params: document_id (str, required), comment_id (str, required), reply_content (str, required)
+
+37. resolve_document_comment
+    Resolve a comment in a Google Document.
+    Params: document_id (str, required), comment_id (str, required)
+
+
+GOOGLE SHEETS (14 tools, including 4 comment tools)
+----------------------------------------------------
+
+38. list_spreadsheets
+    List spreadsheets the user has access to.
+    Params: max_results (int, default 25)
+
+39. get_spreadsheet_info
+    Get spreadsheet info including sheets, dimensions, and conditional formatting.
+    Params: spreadsheet_id (str, required)
+
+40. read_sheet_values
+    Read values from a specific range in a Google Sheet.
+    Params: spreadsheet_id (str, required), range_name (str, default "A1:Z1000"),
+            include_hyperlinks (bool, default False)
+
+41. modify_sheet_values
+    Write, update, or clear values in a Google Sheet range.
+    Params: spreadsheet_id (str, required), range_name (str, required),
+            values (str|List[List[str]], optional), value_input_option (str, default "USER_ENTERED"),
+            clear_values (bool, default False)
+
+42. format_sheet_range
+    Apply formatting: colors, number formats, text wrapping, alignment, text styling.
+    Params: spreadsheet_id (str, required), range_name (str, required),
+            background_color (str, optional), text_color (str, optional),
+            number_format_type (str, optional), number_format_pattern (str, optional),
+            wrap_strategy (str, optional), horizontal_alignment (str, optional),
+            vertical_alignment (str, optional), bold (bool, optional), italic (bool, optional),
+            font_size (int, optional)
+
+43. add_conditional_formatting
+    Add a conditional formatting rule to a range.
+    Params: spreadsheet_id (str, required), range_name (str, required),
+            condition_type (str, required), condition_values (str|List, optional),
+            background_color (str, optional), text_color (str, optional),
+            rule_index (int, optional), gradient_points (str|List[dict], optional)
+
+44. update_conditional_formatting
+    Update an existing conditional formatting rule by index.
+    Params: spreadsheet_id (str, required), rule_index (int, required),
+            range_name (str, optional), condition_type (str, optional),
+            condition_values (str|List, optional), background_color (str, optional),
+            text_color (str, optional), sheet_name (str, optional),
+            gradient_points (str|List[dict], optional)
+
+45. delete_conditional_formatting
+    Delete a conditional formatting rule by index.
+    Params: spreadsheet_id (str, required), rule_index (int, required), sheet_name (str, optional)
+
+46. create_spreadsheet
+    Create a new Google Spreadsheet.
+    Params: title (str, required), sheet_names (List[str], optional)
+
+47. create_sheet
+    Create a new sheet (tab) within an existing spreadsheet.
+    Params: spreadsheet_id (str, required), sheet_name (str, required)
+
+48. read_spreadsheet_comments
+    Read all comments from a Google Spreadsheet.
+    Params: spreadsheet_id (str, required)
+
+49. create_spreadsheet_comment
+    Create a new comment on a Google Spreadsheet.
+    Params: spreadsheet_id (str, required), comment_content (str, required)
+
+50. reply_to_spreadsheet_comment
+    Reply to a specific comment in a Google Spreadsheet.
+    Params: spreadsheet_id (str, required), comment_id (str, required), reply_content (str, required)
+
+51. resolve_spreadsheet_comment
+    Resolve a comment in a Google Spreadsheet.
+    Params: spreadsheet_id (str, required), comment_id (str, required)
+
+
+GOOGLE SLIDES (9 tools, including 4 comment tools)
+---------------------------------------------------
+
+52. create_presentation
+    Create a new Google Slides presentation.
+    Params: title (str, default "Untitled Presentation")
+
+53. get_presentation
+    Get presentation details including title, slides, page elements, and extracted text.
+    Params: presentation_id (str, required)
+
+54. batch_update_presentation
+    Apply batch updates to a presentation.
+    Params: presentation_id (str, required), requests (List[Dict], required)
+
+55. get_page
+    Get details about a specific slide including all elements and layout.
+    Params: presentation_id (str, required), page_object_id (str, required)
+
+56. get_page_thumbnail
+    Generate a thumbnail URL for a specific slide.
+    Params: presentation_id (str, required), page_object_id (str, required),
+            thumbnail_size (str, default "MEDIUM")
+
+57. read_presentation_comments
+    Read all comments from a Google Presentation.
+    Params: presentation_id (str, required)
+
+58. create_presentation_comment
+    Create a new comment on a Google Presentation.
+    Params: presentation_id (str, required), comment_content (str, required)
+
+59. reply_to_presentation_comment
+    Reply to a specific comment in a Google Presentation.
+    Params: presentation_id (str, required), comment_id (str, required), reply_content (str, required)
+
+60. resolve_presentation_comment
+    Resolve a comment in a Google Presentation.
+    Params: presentation_id (str, required), comment_id (str, required)
+
+
+AUTH (1 tool)
+-------------
+
+61. start_google_auth
+    Manually initiate Google OAuth flow. Legacy OAuth 2.0 only — disabled when OAuth 2.1 is enabled.
+    Usually not needed; auth happens automatically when you call any tool.
+    Params: service_name (str, required)
+
+
+SUMMARY
+-------
+Gmail:   8 tools
+Drive:   9 tools
+Docs:   16 tools
+Sheets: 14 tools
+Slides:  9 tools
+Auth:    1 tool
+TOTAL:  57 tools (+ 4 conditional formatting tools = 61)

@@ -1,0 +1,236 @@
+FIREFLIES MCP SERVER — TOOL REFERENCE
+======================================
+
+20 tools covering the full Fireflies.ai GraphQL API surface.
+Designed for professional services workflows: client meeting intelligence,
+deliverable tracking, engagement analysis, and team oversight.
+
+
+MEETING DISCOVERY & SEARCH
+---------------------------
+
+1. list_transcripts
+   List and filter meeting transcripts. Supports pagination, date ranges,
+   participant/organizer filters, and keyword search. Returns summary
+   metadata for each match. Use this as your starting point to find meetings.
+
+   Parameters:
+     - limit (int, 1-50, default 20): Number of transcripts to return
+     - skip (int): Pagination offset
+     - from_date (ISO 8601 string): Start date filter
+     - to_date (ISO 8601 string): End date filter
+     - keyword (string): Search keyword against transcript content
+     - organizers (string[]): Filter by organizer email addresses
+     - participants (string[]): Filter by participant email addresses
+     - user_id (string): Get transcripts for a specific team member
+     - mine (boolean): Only return your own transcripts
+     - channel_id (string): Filter by Fireflies channel ID
+
+2. search_transcripts
+   Search across all transcripts by keyword, with optional date range and
+   participant/organizer filters. Returns matching transcripts with their
+   overview and keywords. Use this to find meetings about a specific topic,
+   client, or project.
+
+   Parameters:
+     - keyword (string, required): Search keyword
+     - limit (int, 1-50, default 20): Max results
+     - skip (int): Pagination offset
+     - from_date (ISO 8601 string): Start date
+     - to_date (ISO 8601 string): End date
+     - organizers (string[]): Filter by organizer emails
+     - participants (string[]): Filter by participant emails
+
+
+MEETING INTELLIGENCE (per transcript)
+--------------------------------------
+
+3. get_transcript
+   Get complete transcript details by ID, including metadata, full
+   sentence-level transcript with speaker attribution, AI-generated
+   summary, action items, and analytics. This is the most comprehensive
+   view of a single meeting.
+
+   Parameters:
+     - transcript_id (string, required): The transcript ID
+
+4. get_transcript_summary
+   Get the AI-generated summary for a meeting — overview, action items,
+   key topics, keywords, outline, chapters, and meeting type. Much faster
+   and lighter than the full transcript.
+
+   Parameters:
+     - transcript_id (string, required): The transcript ID
+
+5. get_transcript_sentences
+   Get the full sentence-level transcript with speaker names, timestamps,
+   and AI filters (sentiment, tasks, pricing, questions, metrics, dates).
+   Supports filtering by speaker or AI filter type. Use for detailed
+   transcript review or extracting specific content types.
+
+   Parameters:
+     - transcript_id (string, required): The transcript ID
+     - speaker_name (string): Filter to a specific speaker (partial match)
+     - filter_type (enum: task, pricing, metric, question, date_and_time,
+       sentiment): Only return sentences where this AI filter has a value
+     - max_sentences (int, 1-5000): Cap on sentences returned
+
+6. get_transcript_analytics
+   Get meeting analytics including sentiment analysis, speaker statistics
+   (talk time, word count, WPM, filler words, questions asked, monologue
+   patterns), and content categories. Useful for evaluating engagement,
+   preparation, and communication dynamics.
+
+   Parameters:
+     - transcript_id (string, required): The transcript ID
+
+
+PROFESSIONAL SERVICES EXTRACTORS
+----------------------------------
+
+7. get_action_items
+   Extract action items and tasks from a meeting transcript. Returns the
+   AI-generated action items plus any sentences flagged as tasks by the
+   AI filter. Essential for tracking deliverables and follow-ups from
+   client meetings.
+
+   Parameters:
+     - transcript_id (string, required): The transcript ID
+
+8. get_pricing_discussions
+   Extract all pricing-related statements from a meeting. Surfaces any
+   sentences flagged by the AI pricing filter — rate discussions, cost
+   mentions, budget references, etc. Critical for professional services
+   proposals and SOW tracking.
+
+   Parameters:
+     - transcript_id (string, required): The transcript ID
+
+9. get_questions
+   Extract all questions asked during a meeting. Surfaces sentences
+   flagged as questions by AI, grouped by speaker. Useful for understanding
+   client concerns, discovery calls, and ensuring no question went
+   unanswered.
+
+   Parameters:
+     - transcript_id (string, required): The transcript ID
+
+10. get_dates_and_deadlines
+    Extract all date and deadline references from a meeting. Surfaces
+    sentences flagged with date/time mentions by the AI filter. Use for
+    tracking commitments, milestones, and delivery timelines discussed
+    in client meetings.
+
+    Parameters:
+      - transcript_id (string, required): The transcript ID
+
+11. get_metrics
+    Extract all metric and number references from a meeting — KPIs,
+    percentages, dollar amounts, quantities, etc. Useful for tracking
+    discussed metrics, performance numbers, and quantitative commitments.
+
+    Parameters:
+      - transcript_id (string, required): The transcript ID
+
+12. get_sentiment_by_speaker
+    Get per-sentence sentiment breakdown for a meeting, optionally filtered
+    by speaker. Returns sentiment-tagged statements showing positive,
+    negative, and neutral moments. Use for gauging client satisfaction
+    and meeting tone.
+
+    Parameters:
+      - transcript_id (string, required): The transcript ID
+      - speaker_name (string): Filter to a specific speaker (partial match)
+
+13. get_meeting_attendees
+    Get detailed attendee information for a meeting — names, emails, phone
+    numbers, and locations. Useful for identifying client contacts and
+    verifying meeting attendance.
+
+    Parameters:
+      - transcript_id (string, required): The transcript ID
+
+
+TEAM & ACCOUNT
+---------------
+
+14. get_user
+    Get information about the current authenticated user or a specific team
+    member — email, name, number of transcripts, minutes consumed,
+    integrations, and admin status.
+
+    Parameters:
+      - user_id (string): Optional. If omitted, returns current user.
+
+15. get_team_users
+    Get all users in the Fireflies team — their names, emails, transcript
+    counts, minutes consumed, and admin status. Use for team overview and
+    resource tracking.
+
+    Parameters: none
+
+16. get_ai_app_results
+    Get AI App outputs for a specific app or transcript. Fireflies AI Apps
+    run custom extraction prompts against meetings. Use this to retrieve
+    structured outputs from any configured AI App.
+
+    Parameters:
+      - app_id (string): The AI App ID
+      - transcript_id (string): The transcript ID
+      (at least one required)
+
+
+MUTATIONS
+----------
+
+17. upload_audio
+    Upload an audio or video file URL for Fireflies to transcribe. Supports
+    mp3, mp4, and wav. Optionally specify attendees and a webhook for
+    completion notification.
+
+    Parameters:
+      - url (string, required): Direct, publicly accessible URL to the file
+      - title (string): Title for the transcription (max 256 chars)
+      - attendees (array of {displayName, email, phoneNumber}): Attendee list
+      - webhook (string): URL to notify when transcription completes
+
+18. delete_transcript
+    Delete a transcript by ID. Requires admin privileges. Rate-limited to
+    10 requests per minute. Returns confirmation with deleted transcript
+    metadata.
+
+    Parameters:
+      - transcript_id (string, required): The transcript ID to delete
+
+19. create_soundbite
+    Create a soundbite (clip) from a transcript at a specific time range.
+    Useful for highlighting key moments, client quotes, or important
+    decisions.
+
+    Parameters:
+      - transcript_id (string, required): The transcript ID
+      - start_time (number, required): Start time in seconds
+      - end_time (number, required): End time in seconds
+      - visibility (enum: public, team, participants): Default team
+
+20. update_meeting_title
+    Update the title of a meeting transcript. Useful for standardizing
+    meeting names across your CRM/project naming conventions.
+
+    Parameters:
+      - transcript_id (string, required): The transcript ID
+      - title (string, required): The new title
+
+
+DEPLOYMENT
+-----------
+
+Endpoint: POST /mcp (Streamable HTTP, stateless)
+Health:   GET /health
+Auth:     Optional bearer token via MCP_AUTH_TOKEN env var
+
+Env vars:
+  FIREFLIES_API_KEY  (required) — Fireflies API key
+  MCP_AUTH_TOKEN     (optional) — Bearer token to protect endpoint
+  TRANSPORT          (default: http) — "http" or "stdio"
+  PORT               (default: 3000) — HTTP listen port

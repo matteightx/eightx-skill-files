@@ -1,0 +1,1302 @@
+GHL MCP SERVER - COMPLETE TOOL LIST
+====================================
+Total Tools: 156
+
+Breakdown by category:
+- Contacts: 18 tools
+- Notes: 5 tools
+- Tasks: 7 tools
+- Conversations: 14 tools
+- Opportunities: 10 tools
+- Calendars: 12 tools
+- Workflows: 3 tools
+- CRM: 14 tools
+- Marketing: 15 tools
+- Commerce: 17 tools
+- Content: 11 tools
+- Admin: 22 tools
+- Intelligence: 8 tools (pre-digested summaries, not raw API)
+
+
+================================================================================
+CONTACTS (18 tools)
+================================================================================
+
+1. contacts_search
+   Search contacts with filters. Find contacts by name, email, phone, tags,
+   custom fields, date ranges, and more. Returns paginated results.
+   Params:
+     - query (string, optional): Search query string (name, email, phone)
+     - filters (array, optional): Array of filter conditions
+         field (string): Field to filter on
+         operator (string): eq, neq, contains, starts_with, ends_with, gt, lt, gte, lte, exists, not_exists, between
+         value (string|number|boolean|array): Filter value
+     - page (number, optional): Page number (starts at 1)
+     - pageLimit (number, optional): Results per page (max 100, default 20)
+     - sortBy (string, optional): Field to sort by
+     - sortOrder ("asc"|"desc", optional): Sort order
+
+2. contacts_get
+   Get a single contact by ID. Returns full contact details including custom
+   fields, tags, and attribution data.
+   Params:
+     - contactId (string, required): The contact ID
+
+3. contacts_create
+   Create a new contact. Provide at least name or email. Supports custom fields,
+   tags, and DND settings.
+   Params:
+     - firstName (string, optional): First name
+     - lastName (string, optional): Last name
+     - name (string, optional): Full name (alternative to first+last)
+     - email (string, optional): Email address
+     - phone (string, optional): Phone number (E.164 format preferred)
+     - companyName (string, optional): Company name
+     - website (string, optional): Website URL
+     - tags (array of strings, optional): Tags to assign
+     - source (string, optional): Lead source
+     - address1 (string, optional): Street address
+     - city (string, optional): City
+     - state (string, optional): State
+     - postalCode (string, optional): Postal/ZIP code
+     - country (string, optional): Country
+     - timezone (string, optional): Timezone (e.g., America/New_York)
+     - gender (string, optional): Gender
+     - dateOfBirth (string, optional): Date of birth (YYYY-MM-DD)
+     - assignedTo (string, optional): User ID to assign contact to
+     - customFields (array, optional): Custom field values [{id, field_value}]
+     - dnd (boolean, optional): Do Not Disturb flag
+     - dndSettings (object, optional): DND settings per channel
+
+4. contacts_update
+   Update an existing contact. Only include fields you want to change.
+   Params:
+     - contactId (string, required): The contact ID to update
+     - firstName, lastName, name, email, phone, companyName, website, tags,
+       source, address1, city, state, postalCode, country, timezone,
+       assignedTo, customFields, dnd (all optional, same as create)
+
+5. contacts_upsert
+   Create or update a contact. If matching contact found (by email or phone),
+   it updates. Otherwise creates new.
+   Params:
+     - firstName, lastName, name, email, phone, companyName, tags, source,
+       assignedTo, customFields (all optional)
+
+6. contacts_delete
+   Permanently delete a contact. Cannot be undone. All associated data removed.
+   Params:
+     - contactId (string, required): The contact ID to delete
+
+7. contacts_find_duplicates
+   Search for duplicate contacts by email or phone.
+   Params:
+     - email (string, optional): Email to search for duplicates
+     - phone (string, optional): Phone to search for duplicates
+     - pageLimit (number, optional): Results per page
+
+8. contacts_add_tags
+   Add one or more tags to a contact.
+   Params:
+     - contactId (string, required): The contact ID
+     - tags (array of strings, required): Tags to add
+
+9. contacts_remove_tags
+   Remove one or more tags from a contact.
+   Params:
+     - contactId (string, required): The contact ID
+     - tags (array of strings, required): Tags to remove
+
+10. contacts_bulk_tag_update
+    Add or remove tags from multiple contacts at once.
+    Params:
+      - contactIds (array of strings, required): Array of contact IDs
+      - tags (array of strings, required): Tags to add or remove
+      - type ("add"|"remove", required): Whether to add or remove the tags
+
+11. contacts_add_to_workflow
+    Add a contact to a workflow/automation.
+    Params:
+      - contactId (string, required): The contact ID
+      - workflowId (string, required): The workflow ID
+
+12. contacts_remove_from_workflow
+    Remove a contact from a workflow.
+    Params:
+      - contactId (string, required): The contact ID
+      - workflowId (string, required): The workflow ID
+
+13. contacts_add_to_campaign
+    Add a contact to a campaign (drip sequence).
+    Params:
+      - contactId (string, required): The contact ID
+      - campaignId (string, required): The campaign ID
+
+14. contacts_remove_from_campaign
+    Remove a contact from a specific campaign.
+    Params:
+      - contactId (string, required): The contact ID
+      - campaignId (string, required): The campaign ID
+
+15. contacts_remove_from_all_campaigns
+    Remove a contact from ALL campaigns they are enrolled in.
+    Params:
+      - contactId (string, required): The contact ID
+
+16. contacts_get_appointments
+    Get all appointments/calendar events for a specific contact.
+    Params:
+      - contactId (string, required): The contact ID
+
+17. contacts_add_follower
+    Add a team member as a follower on a contact.
+    Params:
+      - contactId (string, required): The contact ID
+      - followers (array of strings, required): User IDs to add as followers
+
+18. contacts_remove_follower
+    Remove a team member as a follower from a contact.
+    Params:
+      - contactId (string, required): The contact ID
+      - followers (array of strings, required): User IDs to remove
+
+
+================================================================================
+NOTES (5 tools)
+================================================================================
+
+19. notes_list
+    List all notes for a contact.
+    Params:
+      - contactId (string, required): The contact ID
+
+20. notes_create
+    Add a note to a contact. Use for call outcomes, meeting summaries,
+    qualification data, objections, next steps, etc.
+    Params:
+      - contactId (string, required): The contact ID
+      - body (string, required): The note content
+      - userId (string, optional): User ID of the note author
+
+21. notes_get
+    Get a specific note by ID.
+    Params:
+      - contactId (string, required): The contact ID
+      - noteId (string, required): The note ID
+
+22. notes_update
+    Update an existing note on a contact.
+    Params:
+      - contactId (string, required): The contact ID
+      - noteId (string, required): The note ID
+      - body (string, required): Updated note content
+      - userId (string, optional): User ID
+
+23. notes_delete
+    Delete a note from a contact.
+    Params:
+      - contactId (string, required): The contact ID
+      - noteId (string, required): The note ID to delete
+
+
+================================================================================
+TASKS (7 tools)
+================================================================================
+
+24. tasks_list
+    List all tasks for a contact.
+    Params:
+      - contactId (string, required): The contact ID
+
+25. tasks_create
+    Create a task/follow-up for a contact.
+    Params:
+      - contactId (string, required): The contact ID
+      - title (string, required): Task title
+      - body (string, optional): Task description
+      - dueDate (string, required): Due date (ISO format)
+      - assignedTo (string, optional): User ID to assign to
+      - completed (boolean, optional): Whether already completed
+
+26. tasks_get
+    Get a specific task by ID.
+    Params:
+      - contactId (string, required): The contact ID
+      - taskId (string, required): The task ID
+
+27. tasks_update
+    Update a task. Reschedule, reassign, or modify details.
+    Params:
+      - contactId (string, required): The contact ID
+      - taskId (string, required): The task ID
+      - title, body, dueDate, assignedTo, completed (all optional)
+
+28. tasks_complete
+    Mark a task as completed.
+    Params:
+      - contactId (string, required): The contact ID
+      - taskId (string, required): The task ID
+
+29. tasks_delete
+    Delete a task from a contact.
+    Params:
+      - contactId (string, required): The contact ID
+      - taskId (string, required): The task ID
+
+30. tasks_search
+    Search tasks across all contacts. Find overdue tasks, tasks by user, etc.
+    Params:
+      - query (string, optional): Search query
+      - assignedTo (array of strings, optional): Filter by user IDs
+      - completed (boolean, optional): Filter by completion status
+      - dueDateStart (string, optional): Filter tasks due after this date
+      - dueDateEnd (string, optional): Filter tasks due before this date
+      - limit (number, optional): Max results (default 20, max 100)
+      - skip (number, optional): Skip results
+
+
+================================================================================
+CONVERSATIONS (14 tools)
+================================================================================
+
+31. conversations_search
+    Search conversations across all contacts.
+    Params:
+      - contactId (string, optional): Filter by contact ID
+      - assignedTo (string, optional): Filter by assigned user ID
+      - query (string, optional): Search query
+      - status ("all"|"read"|"unread"|"starred"|"recents", optional)
+      - lastMessageType (string, optional): Filter by message type/channel
+      - limit (number, optional): Max results (default 20, max 100)
+      - startAfterDate (string, optional): Cursor for pagination (ISO date)
+
+32. conversations_get
+    Get a specific conversation by ID.
+    Params:
+      - conversationId (string, required): The conversation ID
+
+33. conversations_create
+    Create a new conversation thread for a contact.
+    Params:
+      - contactId (string, required): The contact ID
+
+34. conversations_update
+    Update conversation properties (read/unread, star, assign).
+    Params:
+      - conversationId (string, required): The conversation ID
+      - starred (boolean, optional): Star/unstar
+      - unreadCount (number, optional): Set unread count (0 = mark as read)
+      - assignedTo (string, optional): Assign to a user ID
+
+35. conversations_delete
+    Delete a conversation thread.
+    Params:
+      - conversationId (string, required): The conversation ID
+
+36. messages_send
+    Send a message via SMS, Email, WhatsApp, or other channels.
+    Params:
+      - type ("SMS"|"Email"|"WhatsApp"|"GMB"|"IG"|"FB"|"Custom_SMS"|"Custom_Email"|"Live_Chat", required)
+      - contactId (string, required): The contact ID
+      - message (string, optional): Message body (required for SMS/WhatsApp)
+      - subject (string, optional): Email subject (required for Email)
+      - html (string, optional): HTML email body
+      - emailFrom (string, optional): From name for email
+      - emailTo (string, optional): Override recipient email
+      - emailCc (array of strings, optional): CC addresses
+      - emailBcc (array of strings, optional): BCC addresses
+      - emailReplyMode ("reply"|"reply_all", optional)
+      - conversationId (string, optional): Existing conversation ID
+      - conversationProviderId (string, optional): Provider ID
+      - appointmentId (string, optional): Link to appointment
+      - scheduledTimestamp (number, optional): Unix timestamp for scheduled send
+      - attachments (array of strings, optional): Attachment URLs
+
+37. messages_list
+    List all messages in a conversation thread.
+    Params:
+      - conversationId (string, required): The conversation ID
+      - limit (number, optional): Max messages (default 20, max 100)
+      - lastMessageId (string, optional): Cursor for pagination
+      - type (string, optional): Filter by message type
+
+38. messages_get
+    Get a specific message by ID.
+    Params:
+      - messageId (string, required): The message ID
+
+39. messages_get_email
+    Get full email message details including HTML body, headers, and thread info.
+    Params:
+      - emailMessageId (string, required): The email message ID
+
+40. messages_add_inbound
+    Record an inbound message from a contact.
+    Params:
+      - type (string, required): Message channel type
+      - contactId (string, required): The contact ID
+      - message (string, optional): Message body
+      - subject (string, optional): Email subject
+      - html (string, optional): HTML body
+      - conversationId (string, optional): Existing conversation ID
+      - conversationProviderId (string, optional): Provider ID
+
+41. messages_cancel_scheduled
+    Cancel a message scheduled for future delivery.
+    Params:
+      - messageId (string, required): The scheduled message ID
+
+42. messages_cancel_scheduled_email
+    Cancel a scheduled email message.
+    Params:
+      - emailMessageId (string, required): The scheduled email message ID
+
+43. messages_update_status
+    Update delivery status of a message.
+    Params:
+      - messageId (string, required): The message ID
+      - status ("pending"|"delivered"|"read"|"failed"|"sent", required)
+      - error (string, optional): Error message if status is 'failed'
+
+44. messages_get_recording
+    Get the recording URL for a phone call.
+    Params:
+      - messageId (string, required): The call message ID
+
+45. messages_get_transcription
+    Get the transcription text for a phone call.
+    Params:
+      - messageId (string, required): The call message ID
+
+
+================================================================================
+OPPORTUNITIES (10 tools)
+================================================================================
+
+46. pipelines_list
+    List all sales pipelines and their stages.
+    Params: None
+
+47. opportunities_search
+    Search opportunities/deals with filters.
+    Params:
+      - pipelineId (string, optional): Filter by pipeline
+      - pipelineStageId (string, optional): Filter by stage
+      - status ("open"|"won"|"lost"|"abandoned"|"all", optional)
+      - assignedTo (string, optional): Filter by user
+      - contactId (string, optional): Filter by contact
+      - query (string, optional): Search query
+      - monetaryValue (number, optional): Filter by value
+      - startDate (string, optional): Created after (ISO)
+      - endDate (string, optional): Created before (ISO)
+      - limit (number, optional): Max results (default 20, max 100)
+      - startAfter (string, optional): Cursor for pagination
+      - startAfterId (string, optional): Cursor for pagination
+      - order ("added_asc"|"added_desc"|"updated_asc"|"updated_desc", optional)
+
+48. opportunities_get
+    Get a specific opportunity/deal by ID.
+    Params:
+      - opportunityId (string, required): The opportunity ID
+
+49. opportunities_create
+    Create a new opportunity/deal in a pipeline.
+    Params:
+      - name (string, required): Opportunity name
+      - pipelineId (string, required): Pipeline ID
+      - pipelineStageId (string, required): Stage ID
+      - contactId (string, required): Contact ID
+      - status ("open"|"won"|"lost"|"abandoned", optional)
+      - monetaryValue (number, optional): Deal value
+      - source (string, optional): Lead source
+      - assignedTo (string, optional): User ID
+      - customFields (array, optional): Custom field values
+
+50. opportunities_update
+    Update an opportunity/deal.
+    Params:
+      - opportunityId (string, required): The opportunity ID
+      - name, pipelineId, pipelineStageId, status, monetaryValue, source,
+        assignedTo, customFields (all optional)
+
+51. opportunities_update_status
+    Update just the status of an opportunity (won/lost/abandoned).
+    Params:
+      - opportunityId (string, required): The opportunity ID
+      - status ("open"|"won"|"lost"|"abandoned", required)
+
+52. opportunities_upsert
+    Create or update an opportunity. Matches by pipeline + contact.
+    Params:
+      - name (string, required): Opportunity name
+      - pipelineId (string, required): Pipeline ID
+      - pipelineStageId (string, required): Stage ID
+      - contactId (string, required): Contact ID
+      - status, monetaryValue, source, assignedTo (all optional)
+
+53. opportunities_delete
+    Delete an opportunity permanently.
+    Params:
+      - opportunityId (string, required): The opportunity ID
+
+54. opportunities_add_follower
+    Add a team member as a follower on a deal.
+    Params:
+      - opportunityId (string, required): The opportunity ID
+      - followers (array of strings, required): User IDs
+
+55. opportunities_remove_follower
+    Remove a follower from a deal.
+    Params:
+      - opportunityId (string, required): The opportunity ID
+      - followers (array of strings, required): User IDs
+
+
+================================================================================
+CALENDARS (12 tools)
+================================================================================
+
+56. calendars_list
+    List all calendars in the location.
+    Params: None
+
+57. calendars_get
+    Get details of a specific calendar.
+    Params:
+      - calendarId (string, required): The calendar ID
+
+58. calendars_create
+    Create a new calendar.
+    Params:
+      - name (string, required): Calendar name
+      - description (string, optional)
+      - calendarType ("round_robin"|"event"|"class_booking"|"collective"|"service_booking", optional)
+      - slotDuration (number, optional): Duration in minutes
+      - slotBuffer (number, optional): Buffer time in minutes
+      - slotInterval (number, optional): Interval between slots
+      - teamMembers (array, optional): [{userId, priority, meetingLocation}]
+
+59. calendars_update
+    Update a calendar's settings.
+    Params:
+      - calendarId (string, required)
+      - name, description, slotDuration, slotBuffer, slotInterval (all optional)
+
+60. calendars_delete
+    Delete a calendar.
+    Params:
+      - calendarId (string, required)
+
+61. calendars_get_free_slots
+    Get available time slots for a calendar within a date range.
+    Params:
+      - calendarId (string, required)
+      - startDate (string, required): YYYY-MM-DD or ISO
+      - endDate (string, required): YYYY-MM-DD or ISO
+      - timezone (string, optional): e.g., America/New_York
+      - userId (string, optional): Filter by team member
+
+62. appointments_create
+    Book an appointment for a contact on a calendar.
+    Params:
+      - calendarId (string, required)
+      - contactId (string, required)
+      - startTime (string, required): ISO format
+      - endTime (string, required): ISO format
+      - title (string, optional)
+      - status ("confirmed"|"cancelled"|"showed"|"noshow"|"invalid", optional)
+      - assignedUserId (string, optional)
+      - address (string, optional)
+      - meetingUrl (string, optional)
+      - notes (string, optional)
+      - ignoreDateRange (boolean, optional)
+      - toNotify (boolean, optional)
+
+63. appointments_get
+    Get details of a specific appointment.
+    Params:
+      - eventId (string, required)
+
+64. appointments_update
+    Update an appointment (reschedule, change status, etc.).
+    Params:
+      - eventId (string, required)
+      - calendarId, startTime, endTime, title, status, assignedUserId,
+        address, meetingUrl, notes (all optional)
+
+65. appointments_delete
+    Delete an appointment.
+    Params:
+      - eventId (string, required)
+
+66. appointments_list
+    List appointments within a date range.
+    Params:
+      - calendarId (string, optional)
+      - startTime (string, required): ISO format
+      - endTime (string, required): ISO format
+      - userId (string, optional)
+      - groupId (string, optional)
+
+67. calendars_create_block_slot
+    Block a time slot on a calendar.
+    Params:
+      - calendarId (string, required)
+      - startTime (string, required): ISO format
+      - endTime (string, required): ISO format
+      - title (string, optional)
+      - assignedUserId (string, optional)
+
+68. calendars_get_blocked_slots
+    Get all blocked time slots for a calendar.
+    Params:
+      - calendarId (string, required)
+      - startTime (string, required)
+      - endTime (string, required)
+      - userId (string, optional)
+
+
+================================================================================
+WORKFLOWS (3 tools)
+================================================================================
+
+69. workflows_list
+    List all workflows (automations) in the location.
+    Note: GHL API only supports listing and adding/removing contacts.
+    Params: None
+
+70. campaigns_list
+    List all campaigns (drip sequences).
+    Params: None
+
+71. campaigns_get_email_schedule
+    Get the email sending schedule for campaigns.
+    Params: None
+
+
+================================================================================
+CRM (14 tools)
+================================================================================
+
+72. tags_list
+    List all tags in the location.
+    Params: None
+
+73. tags_create
+    Create a new tag.
+    Params:
+      - name (string, required): Tag name
+
+74. tags_update
+    Update (rename) a tag.
+    Params:
+      - tagId (string, required)
+      - name (string, required): New tag name
+
+75. tags_delete
+    Delete a tag. Removes it from all contacts.
+    Params:
+      - tagId (string, required)
+
+76. custom_fields_list
+    List all custom fields.
+    Params:
+      - model ("contact"|"opportunity"|"all", optional)
+
+77. custom_fields_create
+    Create a new custom field.
+    Params:
+      - name (string, required): Field name
+      - dataType ("TEXT"|"LARGE_TEXT"|"NUMERICAL"|"PHONE"|"MONETORY"|"CHECKBOX"|"SINGLE_OPTIONS"|"MULTIPLE_OPTIONS"|"FLOAT"|"DATE"|"TEXTBOX_LIST"|"FILE_UPLOAD"|"SIGNATURE", required)
+      - model ("contact"|"opportunity", optional)
+      - placeholder (string, optional)
+      - options (array of strings, optional): For dropdown types
+      - acceptedFormat (array, optional): For FILE_UPLOAD
+      - isMultipleFile (boolean, optional)
+      - maxNumberOfFiles (number, optional)
+      - position (number, optional)
+
+78. custom_fields_update
+    Update a custom field definition.
+    Params:
+      - fieldId (string, required)
+      - name, placeholder, options, position (all optional)
+
+79. custom_fields_delete
+    Delete a custom field and its values from all records.
+    Params:
+      - fieldId (string, required)
+
+80. custom_values_list
+    List all custom values (location-level variables).
+    Params: None
+
+81. custom_values_create
+    Create a new custom value (reusable variable like {{custom_values.company_phone}}).
+    Params:
+      - name (string, required)
+      - value (string, required)
+
+82. custom_values_update
+    Update a custom value.
+    Params:
+      - customValueId (string, required)
+      - name (string, optional)
+      - value (string, optional)
+
+83. custom_values_delete
+    Delete a custom value.
+    Params:
+      - customValueId (string, required)
+
+84. users_list
+    List all users (team members) in the location.
+    Params:
+      - companyId (string, optional)
+      - locationId (string, optional)
+
+85. users_get
+    Get details of a specific user/team member.
+    Params:
+      - userId (string, required)
+
+86. users_search
+    Search for users by name or other criteria.
+    Params:
+      - query (string, optional)
+      - companyId (string, optional)
+      - locationId (string, optional)
+      - limit (number, optional)
+      - skip (number, optional)
+
+
+================================================================================
+MARKETING (15 tools)
+================================================================================
+
+87. email_templates_list
+    List all email templates.
+    Params:
+      - originId (string, optional)
+      - limit (number, optional)
+      - offset (number, optional)
+
+88. email_templates_create
+    Create a new email template.
+    Params:
+      - name (string, required)
+      - subject (string, optional)
+      - html (string, optional): HTML body
+      - previewText (string, optional)
+
+89. email_templates_delete
+    Delete an email template.
+    Params:
+      - templateId (string, required)
+
+90. email_verify
+    Verify if an email address is valid and deliverable.
+    Params:
+      - email (string, required)
+
+91. social_media_list_posts
+    List social media posts (scheduled, published, drafts, etc.).
+    Params:
+      - type ("all"|"scheduled"|"published"|"draft"|"in_review"|"failed", optional)
+      - accountIds (array of strings, optional)
+      - fromDate (string, optional)
+      - toDate (string, optional)
+      - limit (number, optional)
+      - offset (number, optional)
+      - includeUsers (boolean, optional)
+
+92. social_media_create_post
+    Create and schedule a social media post across platforms.
+    Params:
+      - accountIds (array of strings, required)
+      - summary (string, optional): Post text
+      - media (array, optional): [{url, type: "image"|"video"}]
+      - status ("draft"|"scheduled"|"in_review", optional)
+      - scheduledAt (string, optional): ISO format
+      - tags (array of strings, optional)
+      - ogDetails (object, optional)
+
+93. social_media_get_post
+    Get details of a specific social media post.
+    Params:
+      - postId (string, required)
+
+94. social_media_update_post
+    Update a social media post.
+    Params:
+      - postId (string, required)
+      - summary, accountIds, media, status, scheduledAt (all optional)
+
+95. social_media_delete_post
+    Delete a social media post.
+    Params:
+      - postId (string, required)
+
+96. social_media_list_accounts
+    List all connected social media accounts.
+    Params: None
+
+97. social_media_get_stats
+    Get social media posting statistics and engagement metrics.
+    Params:
+      - fromDate (string, optional)
+      - toDate (string, optional)
+      - accountIds (array of strings, optional)
+
+98. social_media_list_categories
+    List social media post categories.
+    Params: None
+
+99. blogs_list_sites
+    List all blog sites.
+    Params: None
+
+100. blogs_list_posts
+     List all blog posts.
+     Params:
+       - status ("published"|"draft"|"scheduled", optional)
+       - authorId (string, optional)
+       - categoryId (string, optional)
+       - limit (number, optional)
+       - offset (number, optional)
+
+101. blogs_create_post
+     Create a new blog post.
+     Params:
+       - title (string, required)
+       - body (string, required): HTML content
+       - slug (string, optional)
+       - status ("published"|"draft"|"scheduled", optional)
+       - authorId (string, optional)
+       - categoryIds (array of strings, optional)
+       - tags (array of strings, optional)
+       - imageUrl (string, optional): Featured image
+       - imageAltText (string, optional)
+       - metaTitle (string, optional): SEO title
+       - metaDescription (string, optional): SEO description
+       - canonicalUrl (string, optional)
+       - publishedAt (string, optional)
+       - rawHTML (boolean, optional)
+
+102. blogs_update_post
+     Update an existing blog post.
+     Params:
+       - postId (string, required)
+       - title, body, slug, status, authorId, categoryIds, tags, imageUrl,
+         metaTitle, metaDescription, publishedAt (all optional)
+
+103. blogs_list_authors
+     List all blog authors.
+     Params: None
+
+104. blogs_list_categories
+     List all blog categories.
+     Params: None
+
+105. blogs_check_slug
+     Check if a blog post URL slug is available.
+     Params:
+       - slug (string, required)
+
+
+================================================================================
+COMMERCE (17 tools)
+================================================================================
+
+106. invoices_list
+     List all invoices.
+     Params:
+       - status ("draft"|"sent"|"paid"|"void"|"partially_paid", optional)
+       - contactId (string, optional)
+       - startAt (string, optional)
+       - endAt (string, optional)
+       - search (string, optional)
+       - limit (number, optional, default 25)
+       - offset (number, optional)
+       - paymentMode (string, optional)
+
+107. invoices_get
+     Get a specific invoice with full details.
+     Params:
+       - invoiceId (string, required)
+
+108. invoices_create
+     Create a new invoice for a contact.
+     Params:
+       - contactId (string, required)
+       - name (string, required)
+       - title (string, optional)
+       - dueDate (string, optional): ISO format
+       - issueDate (string, optional)
+       - currency (string, optional, default USD)
+       - items (array, required): [{name, description, amount, qty, taxes}]
+       - discount (object, optional): {type: "percentage"|"fixed", value}
+       - termsNotes (string, optional)
+       - businessDetails (object, optional)
+
+109. invoices_update
+     Update an existing invoice.
+     Params:
+       - invoiceId (string, required)
+       - name, title, dueDate, items, discount, termsNotes (all optional)
+
+110. invoices_delete
+     Delete an invoice permanently.
+     Params:
+       - invoiceId (string, required)
+
+111. invoices_send
+     Send an invoice to the contact via email with payment link.
+     Params:
+       - invoiceId (string, required)
+
+112. invoices_void
+     Void an invoice (mark as cancelled without deleting).
+     Params:
+       - invoiceId (string, required)
+
+113. invoices_record_payment
+     Record a manual payment against an invoice.
+     Params:
+       - invoiceId (string, required)
+       - amount (number, required)
+       - mode (string, optional): e.g., 'cash', 'check', 'wire'
+       - notes (string, optional)
+
+114. invoices_generate_number
+     Generate the next sequential invoice number.
+     Params: None
+
+115. invoices_text2pay
+     Send a Text2Pay SMS link for an invoice.
+     Params:
+       - invoiceId (string, required)
+
+116. orders_list
+     List all orders/payments.
+     Params:
+       - contactId (string, optional)
+       - startAt, endAt (string, optional)
+       - limit, offset (number, optional)
+       - search (string, optional)
+       - status (string, optional)
+
+117. orders_get
+     Get a specific order by ID.
+     Params:
+       - orderId (string, required)
+
+118. transactions_list
+     List payment transactions.
+     Params:
+       - contactId (string, optional)
+       - startAt, endAt (string, optional)
+       - limit, offset (number, optional)
+       - search (string, optional)
+       - entityId (string, optional)
+       - entitySourceType (string, optional)
+
+119. subscriptions_list
+     List all active and past subscriptions.
+     Params:
+       - contactId (string, optional)
+       - limit, offset (number, optional)
+
+120. coupons_list
+     List all discount coupons/promo codes.
+     Params: None
+
+121. products_list
+     List all products/services.
+     Params:
+       - search (string, optional)
+       - limit, offset (number, optional)
+
+122. products_get
+     Get a specific product with full details.
+     Params:
+       - productId (string, required)
+
+123. products_create
+     Create a new product or service listing.
+     Params:
+       - name (string, required)
+       - description (string, optional)
+       - productType ("PHYSICAL"|"DIGITAL"|"SERVICE", optional)
+       - imageUrl (string, optional)
+       - availableInStore (boolean, optional)
+       - statementDescriptor (string, optional)
+
+124. products_update
+     Update a product's details.
+     Params:
+       - productId (string, required)
+       - name, description, imageUrl, availableInStore (all optional)
+
+125. products_delete
+     Delete a product.
+     Params:
+       - productId (string, required)
+
+126. products_list_prices
+     List all price variants for a product.
+     Params:
+       - productId (string, required)
+
+127. products_create_price
+     Add a price variant to a product.
+     Params:
+       - productId (string, required)
+       - name (string, required)
+       - amount (number, required): Price in cents
+       - currency (string, optional, default USD)
+       - type ("one_time"|"recurring", optional)
+       - recurringInterval ("day"|"week"|"month"|"year", optional)
+       - recurringIntervalCount (number, optional)
+
+
+================================================================================
+CONTENT (11 tools)
+================================================================================
+
+128. forms_list
+     List all forms in the location.
+     Params:
+       - type (string, optional)
+       - limit (number, optional)
+       - skip (number, optional)
+
+129. forms_get_submissions
+     Get form submissions.
+     Params:
+       - formId (string, optional)
+       - startAt (string, optional)
+       - endAt (string, optional)
+       - limit (number, optional)
+       - page (number, optional)
+       - q (string, optional): Search query
+
+130. surveys_list
+     List all surveys.
+     Params:
+       - limit (number, optional)
+       - skip (number, optional)
+
+131. surveys_get_submissions
+     Get survey submissions/responses.
+     Params:
+       - surveyId (string, optional)
+       - startAt, endAt (string, optional)
+       - limit (number, optional)
+       - page (number, optional)
+       - q (string, optional)
+
+132. funnels_list
+     List all funnels (landing pages and multi-step funnels).
+     Params:
+       - limit (number, optional)
+       - offset (number, optional)
+
+133. funnels_list_pages
+     List all pages within a funnel.
+     Params:
+       - funnelId (string, required)
+       - limit, offset (number, optional)
+
+134. funnels_count_pages
+     Get the total count of funnel pages.
+     Params:
+       - funnelId (string, optional)
+
+135. funnels_list_redirects
+     List all funnel URL redirects.
+     Params:
+       - limit, offset (number, optional)
+
+136. funnels_create_redirect
+     Create a URL redirect for a funnel.
+     Params:
+       - target (string, required): Target URL
+       - path (string, required): Redirect path
+       - action ("funnel"|"website"|"url"|"all", optional)
+
+137. media_list
+     List media files and folders.
+     Params:
+       - sortBy ("createdAt"|"updatedAt"|"name", optional)
+       - sortOrder ("asc"|"desc", optional)
+       - limit, offset (number, optional)
+
+138. media_delete
+     Delete a file from the media library.
+     Params:
+       - fileId (string, required)
+
+
+================================================================================
+ADMIN (22 tools)
+================================================================================
+
+139. location_get
+     Get the current location (sub-account) details.
+     Params: None
+
+140. location_update
+     Update location/sub-account settings.
+     Params:
+       - name, phone, email, website, address, city, state, postalCode,
+         country, timezone (all optional strings)
+
+141. locations_search
+     Search across locations/sub-accounts (agency-level).
+     Params:
+       - companyId (string, required)
+       - query (string, optional)
+       - limit, skip (number, optional)
+
+142. location_list_templates
+     List message templates for the location.
+     Params:
+       - type ("sms"|"email"|"whatsapp", optional)
+
+143. location_get_timezones
+     Get available timezones.
+     Params: None
+
+144. businesses_list
+     List all businesses/companies.
+     Params:
+       - query (string, optional)
+       - limit, skip (number, optional)
+
+145. businesses_get
+     Get details of a specific business.
+     Params:
+       - businessId (string, required)
+
+146. businesses_create
+     Create a new business/company record.
+     Params:
+       - name (string, required)
+       - phone, email, website, address, city, state, postalCode, country,
+         description (all optional)
+
+147. businesses_update
+     Update a business/company record.
+     Params:
+       - businessId (string, required)
+       - name, phone, email, website, address, city, state, postalCode,
+         country, description (all optional)
+
+148. businesses_delete
+     Delete a business/company record.
+     Params:
+       - businessId (string, required)
+
+149. custom_objects_list_schemas
+     List all custom object schemas.
+     Params: None
+
+150. custom_objects_get_schema
+     Get a specific custom object schema definition.
+     Params:
+       - key (string, required): Object schema key
+
+151. custom_objects_create_schema
+     Create a new custom object schema (new data model).
+     Params:
+       - key (string, required): Unique key (lowercase, no spaces)
+       - name (string, required): Display name
+       - description (string, optional)
+       - labels (object, required): {singular, plural}
+       - primaryDisplayProperty (string, optional)
+       - searchableProperties (array of strings, optional)
+
+152. custom_objects_update_schema
+     Update a custom object schema.
+     Params:
+       - key (string, required)
+       - name, description (optional)
+       - labels (object, optional)
+
+153. custom_objects_create_record
+     Create a new record in a custom object.
+     Params:
+       - schemaKey (string, required)
+       - properties (object, required): Key-value pairs
+       - associations (array, optional)
+
+154. custom_objects_get_record
+     Get a specific record from a custom object.
+     Params:
+       - schemaKey (string, required)
+       - recordId (string, required)
+
+155. custom_objects_update_record
+     Update a record in a custom object.
+     Params:
+       - schemaKey (string, required)
+       - recordId (string, required)
+       - properties (object, required)
+
+156. custom_objects_delete_record
+     Delete a record from a custom object.
+     Params:
+       - schemaKey (string, required)
+       - recordId (string, required)
+
+157. custom_objects_search_records
+     Search records in a custom object with filters.
+     Params:
+       - schemaKey (string, required)
+       - query (string, optional)
+       - filters (array, optional): [{field, operator, value}]
+       - limit, skip (number, optional)
+
+158. links_list
+     List all trigger links (trackable URLs that trigger workflows).
+     Params: None
+
+159. links_create
+     Create a new trigger link.
+     Params:
+       - name (string, required)
+       - redirectTo (string, required)
+
+160. links_update
+     Update a trigger link.
+     Params:
+       - linkId (string, required)
+       - name, redirectTo (optional)
+
+161. links_delete
+     Delete a trigger link.
+     Params:
+       - linkId (string, required)
+
+162. documents_list
+     List all documents and contracts.
+     Params:
+       - contactId (string, optional)
+       - status (string, optional)
+       - limit (number, optional)
+
+163. documents_send
+     Send a document/contract for review and signature.
+     Params:
+       - documentId (string, required)
+       - contactId (string, required)
+       - subject (string, optional)
+       - message (string, optional)
+
+164. documents_list_templates
+     List all document/contract templates.
+     Params: None
+
+165. associations_list
+     List all association definitions (relationships between objects).
+     Params: None
+
+166. associations_create
+     Create a relationship between two records.
+     Params:
+       - fromObjectKey (string, required): Source object key
+       - fromRecordId (string, required): Source record ID
+       - toObjectKey (string, required): Target object key
+       - toRecordId (string, required): Target record ID
+
+167. phone_list_numbers
+     List all phone numbers assigned to the location.
+     Params: None
+
+168. phone_list_number_pools
+     List number pools (groups of phone numbers).
+     Params: None
+
+169. snapshots_list
+     List all snapshots (full account templates). Agency-level feature.
+     Params:
+       - companyId (string, required)
+
+
+================================================================================
+INTELLIGENCE (8 tools) - Pre-digested summaries, not raw API JSON
+================================================================================
+
+170. intelligence_contact_360
+     Compact 360-degree view of a contact: profile, notes, tasks,
+     conversations, opportunities, appointments. Pre-call prep tool.
+     Params:
+       - contactId (string, required)
+       - includeConversations (boolean, optional, default true)
+       - includeNotes (boolean, optional, default true)
+       - includeTasks (boolean, optional, default true)
+       - includeOpportunities (boolean, optional, default true)
+       - includeAppointments (boolean, optional, default true)
+
+171. intelligence_morning_brief
+     Daily SDR morning brief: today's appointments, due/overdue tasks,
+     new contacts (24h), pipeline snapshot, unread conversations.
+     Params:
+       - userId (string, optional): Filter by user
+       - date (string, optional): ISO date (default: today)
+
+172. intelligence_pipeline_health
+     Pipeline health report: deal counts/values by stage, stalled deals flagged.
+     Params:
+       - pipelineId (string, required)
+       - staleDays (number, optional, default 7)
+
+173. intelligence_overdue_followups
+     List of overdue tasks and stalled deals. One line per item.
+     Params:
+       - userId (string, optional)
+       - daysOverdue (number, optional, default 1)
+
+174. intelligence_conversation_history
+     Message history for a contact across all channels.
+     [IN/OUT] date (channel): message. Capped at 200 chars per message.
+     Params:
+       - contactId (string, required)
+       - limit (number, optional, default 5)
+       - messagesPerConversation (number, optional, default 20)
+
+175. intelligence_recent_activity
+     Recent activity feed: conversations and new contacts in last N hours.
+     Params:
+       - hoursBack (number, optional, default 24)
+       - userId (string, optional)
+
+176. intelligence_get_contact_context_for_draft
+     Context for drafting a message to a contact: contact info, notes,
+     recent messages, opportunity status, and drafting instructions.
+     Params:
+       - contactId (string, required)
+
+177. intelligence_pipeline_summary
+     Summary of all pipelines: deal counts and values per stage.
+     Params: None
+
+178. intelligence_followup_queue
+     Prioritized daily follow-up work queue from a pipeline stage.
+     One line per contact with IDs, name, phone, email, days since last
+     contact, channel, touchpoint count, note snippet, and urgency flag.
+     Params:
+       - pipelineId (string, required)
+       - stageId (string, optional)
+       - stageName (string, optional): Case-insensitive
+       - maxContacts (number, optional, default 30, max 50)
+       - staleDaysThreshold (number, optional, default 3)
+
+179. intelligence_contact_followup_brief
+     Full follow-up brief for ONE contact. Everything needed to draft
+     the next message: contact info, opportunity stage, notes, message
+     thread, channel breakdown, and follow-up guidance.
+     Params:
+       - contactId (string, required)
+       - opportunityId (string, optional)

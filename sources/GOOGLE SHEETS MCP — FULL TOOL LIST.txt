@@ -1,0 +1,129 @@
+GOOGLE SHEETS MCP — FULL TOOL LIST (88 tools)
+==============================================
+
+SPREADSHEET (13 tools)
+----------------------
+create_spreadsheet          — Create a new blank Google Spreadsheet with a given title
+get_spreadsheet_info        — Get full metadata about a spreadsheet (sheets, properties, locale)
+list_spreadsheets           — List spreadsheets accessible to the service account, optionally filtered by folder
+add_sheet                   — Add a new sheet/tab to an existing spreadsheet
+delete_sheet                — Delete a sheet/tab from a spreadsheet by name
+duplicate_sheet             — Duplicate an existing sheet/tab within the same spreadsheet
+rename_sheet                — Rename an existing sheet/tab
+set_sheet_properties        — Set sheet properties like hidden, tab color, frozen rows/columns, right-to-left
+reorder_sheets              — Reorder sheets/tabs by providing the desired order of sheet names
+copy_spreadsheet            — Make a full copy of an entire spreadsheet
+rename_spreadsheet          — Rename a spreadsheet's title
+copy_sheet_to               — Copy a single sheet/tab from one spreadsheet to another
+get_spreadsheet_url         — Get the URL and parent folder location of a spreadsheet
+
+DATA (12 tools)
+---------------
+read_range                  — Read cell values from a specified range (e.g. Sheet1!A1:D10)
+batch_read                  — Read multiple ranges in a single request
+write_range                 — Write values to a specified range
+batch_write                 — Write to multiple ranges in a single request
+append_rows                 — Append rows of data after the last row with content
+clear_range                 — Clear all values from a range (keeps formatting)
+insert_rows_columns         — Insert blank rows or columns at a given position
+delete_rows_columns         — Delete rows or columns at a given position
+sort_range                  — Sort a range by one or more columns
+find_replace                — Find and replace text across a sheet or specific range
+move_range                  — Cut and paste a range to a new location
+auto_fill                   — Auto-fill a range based on a source pattern (like dragging a cell handle)
+
+FORMATTING (13 tools)
+---------------------
+format_cells                — Set font, size, bold, italic, colors, alignment, number format on a range
+set_borders                 — Apply border styles to a range (top, bottom, left, right, inner)
+merge_cells                 — Merge a range of cells into one
+unmerge_cells               — Unmerge previously merged cells in a range
+set_conditional_formatting  — Create conditional formatting rules (color scales, comparisons, custom formulas)
+clear_conditional_formatting — Remove all conditional formatting rules from a sheet
+set_column_width            — Set the width of one or more columns
+set_row_height              — Set the height of one or more rows
+auto_resize_columns         — Auto-resize columns to fit their content
+group_rows_columns          — Group rows or columns (collapsible outline)
+ungroup_rows_columns        — Ungroup previously grouped rows or columns
+apply_financial_style       — Apply a predefined financial formatting style (input, formula, output, header, total, subtotal, currency, percent, accounting, multiple, date, negative_red)
+alternate_row_colors        — Apply alternating row colors (banding) to a range
+
+CHARTS (5 tools)
+----------------
+create_chart                — Create a chart (bar, line, pie, area, scatter, combo, waterfall, histogram, treemap, org, candlestick)
+update_chart                — Update an existing chart's type, ranges, title, or axis labels
+delete_chart                — Delete a chart by its ID
+list_charts                 — List all charts in a spreadsheet with their metadata
+create_sparkline            — Insert a SPARKLINE formula into a cell
+
+VALIDATION (4 tools)
+--------------------
+set_data_validation         — Set data validation rules on a range (number ranges, date ranges, text, custom formula)
+set_dropdown                — Create a dropdown list in a range from a list of allowed values
+set_checkbox                — Add checkboxes to a range with optional custom checked/unchecked values
+clear_data_validation       — Remove all data validation from a range
+
+NAMED RANGES (4 tools)
+----------------------
+create_named_range          — Create a named range for easy reference in formulas
+list_named_ranges           — List all named ranges in a spreadsheet
+delete_named_range          — Delete a named range by its name
+update_named_range          — Update the range or name of an existing named range
+
+PROTECTION (4 tools)
+--------------------
+protect_range               — Protect a cell range so only specified editors can modify it
+protect_sheet               — Protect an entire sheet, optionally leaving some ranges unprotected
+unprotect                   — Remove protection from a range or sheet by its protection ID
+list_protected_ranges       — List all protected ranges and sheets in a spreadsheet
+
+FORMULAS (6 tools)
+------------------
+get_formulas                — Get all formulas from a range (shows formulas instead of computed values)
+analyze_sheet_formulas      — Analyze all formulas in a sheet: counts, types, and locations
+trace_cell_dependencies     — Trace which cells a given cell depends on (precedents) and which depend on it (dependents)
+find_errors                 — Scan a sheet for all cells containing errors (#REF!, #DIV/0!, #VALUE!, etc.)
+audit_model                 — Audit a financial model: find hardcoded numbers in formula ranges, inconsistent formulas across rows, circular refs
+create_formula_map          — Create a visual map showing formula structure across a sheet (which cells are inputs, formulas, or errors)
+
+FINANCIAL (6 tools)
+-------------------
+create_financial_model      — Create a templated financial model (three_statement, dcf, budget, lbo, comps, portfolio) with pre-built structure and formulas
+create_sensitivity_table    — Create a sensitivity/data table that varies two inputs and shows impact on an output
+calculate_financial_ratios  — Calculate financial ratios (liquidity, profitability, leverage, efficiency) from balance sheet and income statement ranges
+create_amortization_schedule — Create a loan amortization schedule with payment, interest, and principal breakdown
+create_depreciation_schedule — Create a depreciation schedule (straight-line, double-declining, or sum-of-years-digits)
+create_wacc_calculator      — Create a weighted average cost of capital (WACC) calculator sheet
+
+PIVOT (2 tools)
+---------------
+create_pivot_table          — Create a pivot table from a data range with configurable rows, columns, values, and filters
+delete_pivot_table          — Delete a pivot table by its ID
+
+COMMENTS (4 tools)
+------------------
+add_comment                 — Add a threaded comment to a cell (visible in the comment sidebar)
+list_comments               — List all threaded comments in a spreadsheet
+add_note                    — Add a note to a cell (the yellow sticky note that appears on hover)
+clear_note                  — Remove a note from a cell
+
+SHARING (5 tools)
+-----------------
+share_spreadsheet           — Share a spreadsheet with a user, group, or domain (reader, commenter, writer, owner)
+get_sharing_settings        — Get all current sharing permissions on a spreadsheet
+remove_sharing              — Remove a specific user's or group's access from a spreadsheet
+export_to_pdf               — Export a spreadsheet or specific sheet to PDF (returns download URL)
+export_to_csv               — Export a sheet to CSV format (returns the CSV text)
+
+DRIVE (10 tools)
+----------------
+create_folder               — Create a new folder in Google Drive, optionally inside a parent folder
+list_folders                — List folders in Drive, optionally scoped to a parent folder
+move_file                   — Move a file or spreadsheet from one folder to another
+get_file_info               — Get metadata for any file (name, type, size, parents, URL, last modified)
+list_folder_contents        — List all files and subfolders inside a specific folder
+delete_file                 — Move a file or folder to the trash
+rename_file                 — Rename any file or folder in Drive
+share_folder                — Share a folder (and all its contents) with a user, group, or domain
+create_spreadsheet_in_folder — Create a new spreadsheet directly inside a specific folder
+search_drive                — Full-text search across all accessible files in Google Drive
