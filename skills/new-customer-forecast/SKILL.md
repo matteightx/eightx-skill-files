@@ -1,17 +1,28 @@
 ---
 name: new-customer-forecast
-description: "Populate the New_Customer_Forecast_v2 tab in the Havn Financial Model spreadsheet. Reads 24 months of funnel data (ad spend, new customers, revenue, orders, AOV, CAC), calculates base metrics and seasonal indices, writes SUMPRODUCT formulas for historicals, and sets up the forecast framework. Triggers on any request involving 'financial forecast', 'new customer forecast', 'populate the forecast', 'Havn forecast', 'revenue forecast', 'forecast tab', 'forecast model', or 'run the forecast'. This skill prescribes the exact gsheets-mcp tool calls so Claude can execute immediately without tool discovery."
+description: "Populate the New_Customer_Forecast_v2 tab in a client's Financial Model spreadsheet. The user provides the Google Sheet link; the spreadsheet must follow the standard EightX financial model template (24-Month-Funnel source tab, New_Customer_Forecast_v2 target tab). Reads funnel data (ad spend, new customers, revenue, orders, AOV, CAC), calculates base metrics and seasonal indices, writes SUMPRODUCT formulas for historicals, and sets up the forecast framework. Triggers on any request involving 'financial forecast', 'new customer forecast', 'populate the forecast', 'revenue forecast', 'forecast tab', 'forecast model', or 'run the forecast'. This skill prescribes the exact gsheets-mcp tool calls so Claude can execute immediately without tool discovery."
 ---
 
-# Financial Forecasting — Shopify New Customer Revenue
+# New Customer Forecast — Shopify Revenue Model
 
-Populate the **New_Customer_Forecast_v2** tab in the Havn Financial Model by reading 24 months of funnel data, calculating base metrics and seasonal indices, and writing SUMPRODUCT formulas for all historical months. Then set up the forecast framework so the user only needs to input future ad spend to see projected revenue.
+Populate the **New_Customer_Forecast_v2** tab in a client's Financial Model spreadsheet. Reads funnel data, calculates base metrics and seasonal indices, writes SUMPRODUCT formulas for all historical months, and sets up the forecast framework so the user only needs to input future ad spend to see projected revenue.
 
 ## When to Use
 
-- User says "run the forecast," "populate the forecast tab," "financial forecast," "new customer forecast," "Havn forecast," "revenue forecast," or similar
-- User wants to update the Havn Financial Model with latest funnel data
+- User says "run the forecast," "populate the forecast tab," "financial forecast," "new customer forecast," "revenue forecast," or similar
+- User wants to populate or update a client's financial model with latest funnel data
 - User asks about projected new customer revenue or CAC/AOV trends
+- **User must provide the Google Sheet link** (or spreadsheet ID) when invoking this skill
+
+## Step 0: Extract Spreadsheet ID
+
+The user provides a Google Sheet link. Extract the spreadsheet ID from it.
+
+**Link format:** `https://docs.google.com/spreadsheets/d/{SPREADSHEET_ID}/edit...`
+
+Extract the ID between `/d/` and the next `/`. Use this as `{SPREADSHEET_ID}` in every tool call below.
+
+If the user provides just an ID (no URL), use it directly. If they provide neither, ask: "Which client's financial model? Please paste the Google Sheet link."
 
 ## MCP Tool Reference
 
@@ -34,10 +45,11 @@ Call ToolSearch with query: "+gsheets batch_write"
 
 ## Spreadsheet Reference
 
+The spreadsheet ID (`{SPREADSHEET_ID}`) is extracted from the user-provided link in Step 0. All spreadsheets must follow the standard EightX financial model template.
+
 | Item | Value |
 |------|-------|
-| Spreadsheet ID | `1K2N8zasZG1mRf_ZVisZlhuQfuwsro4eRyDLc-OEuzL8` |
-| Spreadsheet Name | Havn - Financial Model v1 |
+| Spreadsheet ID | `{SPREADSHEET_ID}` (from user-provided link) |
 | Source Tab | `24-Month-Funnel` |
 | Target Tab | `New_Customer_Forecast_v2` |
 
@@ -54,8 +66,8 @@ Call ToolSearch with query: "+gsheets batch_write"
 | AE | New Customers | Weekly new customer count |
 | AO | CAC | Weekly cost per acquisition |
 
-- Data lives in rows 2–103 (~100 weeks, Jan 2024 – Dec 2025)
-- Read up to row 200 to be safe for future data additions
+- Data volume varies by client (typically 50–150 weeks)
+- Read up to row 200 to be safe for any data length
 
 ### New_Customer_Forecast_v2 Tab — Cell Map
 
@@ -69,7 +81,7 @@ Call ToolSearch with query: "+gsheets batch_write"
 | B19:M19 | AOV Index (seasonal multiplier per calendar month) |
 | A22:A26 | Spend level thresholds (dollar amounts) |
 | B22:B26 | CAC inflator values (diminishing returns at scale) |
-| Row 29 | Month-end dates: B29=Jan 31 2024 … M29=Dec 2024 … N29=Jan 2025 … Y29=Dec 2025 … Z29=Jan 2026 (first forecast month) |
+| Row 29 | Month-end dates (B29 = first month, continuing chronologically; first column after historicals = first forecast month) |
 | Row 31 | Monthly Ad Spend |
 | Row 32 | CAC |
 | Row 33 | New Customers Acquired |
@@ -78,9 +90,9 @@ Call ToolSearch with query: "+gsheets batch_write"
 | Row 38 | RETURNING CUSTOMER REVENUE (section header, future phase) |
 
 **Column mapping for rows 29–36:**
-- B = Jan 2024, C = Feb 2024, … M = Dec 2024
-- N = Jan 2025, O = Feb 2025, … Y = Dec 2025
-- Z = Jan 2026 (first forecast month), AA = Feb 2026, …
+- B = first historical month, continuing chronologically through column Y (up to 24 months)
+- The first column after the last historical month = first forecast month
+- Read row 29 to determine the actual date range and where historicals end / forecast begins
 
 ## Step-by-Step Workflow
 
@@ -90,7 +102,7 @@ Read the source data in a single batch call.
 
 ```
 Call mcp__claude_ai_gsheets-mcp__batch_read
-  spreadsheet_id: "1K2N8zasZG1mRf_ZVisZlhuQfuwsro4eRyDLc-OEuzL8"
+  spreadsheet_id: "{SPREADSHEET_ID}"
   ranges: [
     "24-Month-Funnel!A2:A200",
     "24-Month-Funnel!P2:P200",
@@ -108,7 +120,7 @@ This returns:
 - Column AE: New Customers — weekly new customer count
 
 **Present to user:**
-- Date range covered (e.g., "Jan 2024 – Dec 2025, 100 weeks of data")
+- Date range covered (e.g., "Jan 2024 – Dec 2025, X weeks of data")
 - Monthly spend trend (increasing? stable?)
 - New customer trend
 - CAC trend (spend / new customers)
@@ -119,26 +131,26 @@ Wait for user acknowledgment before proceeding.
 
 ### Step 2: Calculate & Write Base CAC
 
-Filter funnel data for the **3 most recent months** (Oct–Dec 2025 based on Week Start dates).
+Filter funnel data for the **3 most recent months** of data (based on Week Start dates).
 
 **Calculation:**
 ```
-Base CAC = SUM(Total Cost for Oct–Dec 2025 weeks) / SUM(New Customers for Oct–Dec 2025 weeks)
+Base CAC = SUM(Total Cost for last 3 months) / SUM(New Customers for last 3 months)
 ```
 
 **Write:**
 ```
 Call mcp__claude_ai_gsheets-mcp__write_range
-  spreadsheet_id: "1K2N8zasZG1mRf_ZVisZlhuQfuwsro4eRyDLc-OEuzL8"
+  spreadsheet_id: "{SPREADSHEET_ID}"
   range: "New_Customer_Forecast_v2!B11"
   values: [[{calculated_base_cac}]]
 ```
 
-Tell user: "Base CAC set to ${X} based on Oct–Dec 2025 data (total spend ${Y} / {Z} new customers)."
+Tell user: "Base CAC set to ${X} based on the last 3 months of data (total spend ${Y} / {Z} new customers)."
 
 ### Step 3: Calculate & Write Base AOV
 
-Same 3-month window (Oct–Dec 2025).
+Same 3-month window as Step 2.
 
 **Calculation:**
 ```
@@ -148,12 +160,12 @@ Base AOV = SUM(Net Sales for Oct–Dec 2025 weeks) / SUM(Orders for Oct–Dec 20
 **Write:**
 ```
 Call mcp__claude_ai_gsheets-mcp__write_range
-  spreadsheet_id: "1K2N8zasZG1mRf_ZVisZlhuQfuwsro4eRyDLc-OEuzL8"
+  spreadsheet_id: "{SPREADSHEET_ID}"
   range: "New_Customer_Forecast_v2!B12"
   values: [[{calculated_base_aov}]]
 ```
 
-Tell user: "Base AOV set to ${X} based on Oct–Dec 2025 data (total revenue ${Y} / {Z} orders)."
+Tell user: "Base AOV set to ${X} based on the last 3 months of data (total revenue ${Y} / {Z} orders)."
 
 ### Step 4: Calculate & Write AOV Seasonal Index
 
@@ -169,7 +181,7 @@ AOV_Index(M) = Month_AOV(M) / Overall_Avg_AOV
 **Write:**
 ```
 Call mcp__claude_ai_gsheets-mcp__write_range
-  spreadsheet_id: "1K2N8zasZG1mRf_ZVisZlhuQfuwsro4eRyDLc-OEuzL8"
+  spreadsheet_id: "{SPREADSHEET_ID}"
   range: "New_Customer_Forecast_v2!B19:M19"
   values: [[{jan_index}, {feb_index}, ..., {dec_index}]]
 ```
@@ -190,7 +202,7 @@ CAC_Index(M) = Month_CAC(M) / Overall_Avg_CAC
 **Write:**
 ```
 Call mcp__claude_ai_gsheets-mcp__write_range
-  spreadsheet_id: "1K2N8zasZG1mRf_ZVisZlhuQfuwsro4eRyDLc-OEuzL8"
+  spreadsheet_id: "{SPREADSHEET_ID}"
   range: "New_Customer_Forecast_v2!B18:M18"
   values: [[{jan_index}, {feb_index}, ..., {dec_index}]]
 ```
@@ -203,7 +215,7 @@ The inflator table models diminishing returns: as you scale ad spend beyond the 
 
 **Calculation:**
 ```
-Base_Monthly_Spend = average monthly ad spend for the 3 most recent months (Oct–Dec 2025)
+Base_Monthly_Spend = average monthly ad spend for the 3 most recent months of data
 ```
 
 Generate 5 tiers:
@@ -219,7 +231,7 @@ Generate 5 tiers:
 **Write:**
 ```
 Call mcp__claude_ai_gsheets-mcp__write_range
-  spreadsheet_id: "1K2N8zasZG1mRf_ZVisZlhuQfuwsro4eRyDLc-OEuzL8"
+  spreadsheet_id: "{SPREADSHEET_ID}"
   range: "New_Customer_Forecast_v2!A22:B26"
   values: [
     [{threshold_1}, 1.00],
@@ -236,9 +248,9 @@ Wait for confirmation before continuing.
 
 ### Step 6: Write SUMPRODUCT Formulas — Monthly Ad Spend (Historicals)
 
-Write formulas to **row 31, columns B through Y** (24 historical months: Jan 2024 – Dec 2025).
+Write formulas to **row 31** for all historical month columns (determined by reading row 29 dates — typically B through Y for 24 months).
 
-**Formula pattern** (example for cell B31, which corresponds to Jan 2024):
+**Formula pattern** (example for cell B31, which corresponds to the first historical month):
 ```
 =SUMPRODUCT(('24-Month-Funnel'!$P$2:$P$200)*(MONTH('24-Month-Funnel'!$A$2:$A$200)=MONTH(B29))*(YEAR('24-Month-Funnel'!$A$2:$A$200)=YEAR(B29)))
 ```
@@ -260,7 +272,7 @@ for col in columns:
 **Write:**
 ```
 Call mcp__claude_ai_gsheets-mcp__write_range
-  spreadsheet_id: "1K2N8zasZG1mRf_ZVisZlhuQfuwsro4eRyDLc-OEuzL8"
+  spreadsheet_id: "{SPREADSHEET_ID}"
   range: "New_Customer_Forecast_v2!B31:Y31"
   values: [[{formula_B}, {formula_C}, ..., {formula_Y}]]
   valueInputOption: "USER_ENTERED"
@@ -280,7 +292,7 @@ Same pattern for **row 33**, using column AE (New Customers) instead of P.
 **Write:**
 ```
 Call mcp__claude_ai_gsheets-mcp__write_range
-  spreadsheet_id: "1K2N8zasZG1mRf_ZVisZlhuQfuwsro4eRyDLc-OEuzL8"
+  spreadsheet_id: "{SPREADSHEET_ID}"
   range: "New_Customer_Forecast_v2!B33:Y33"
   values: [[{formula_B}, {formula_C}, ..., {formula_Y}]]
   valueInputOption: "USER_ENTERED"
@@ -298,7 +310,7 @@ Call mcp__claude_ai_gsheets-mcp__write_range
 **Write:**
 ```
 Call mcp__claude_ai_gsheets-mcp__write_range
-  spreadsheet_id: "1K2N8zasZG1mRf_ZVisZlhuQfuwsro4eRyDLc-OEuzL8"
+  spreadsheet_id: "{SPREADSHEET_ID}"
   range: "New_Customer_Forecast_v2!B32:Y32"
   values: [[
     "=IF(B33>0,B31/B33,\"\")", "=IF(C33>0,C31/C33,\"\")", "=IF(D33>0,D31/D33,\"\")",
@@ -333,7 +345,7 @@ for col in columns:
 **Write:**
 ```
 Call mcp__claude_ai_gsheets-mcp__write_range
-  spreadsheet_id: "1K2N8zasZG1mRf_ZVisZlhuQfuwsro4eRyDLc-OEuzL8"
+  spreadsheet_id: "{SPREADSHEET_ID}"
   range: "New_Customer_Forecast_v2!B34:Y34"
   values: [[{formula_B}, {formula_C}, ..., {formula_Y}]]
   valueInputOption: "USER_ENTERED"
@@ -346,7 +358,7 @@ After all historicals are populated, verify and present results.
 **Verify — read back the populated rows:**
 ```
 Call mcp__claude_ai_gsheets-mcp__batch_read
-  spreadsheet_id: "1K2N8zasZG1mRf_ZVisZlhuQfuwsro4eRyDLc-OEuzL8"
+  spreadsheet_id: "{SPREADSHEET_ID}"
   ranges: [
     "New_Customer_Forecast_v2!B29:Y29",
     "New_Customer_Forecast_v2!B31:Y31",
@@ -361,10 +373,9 @@ Call mcp__claude_ai_gsheets-mcp__batch_read
 ```
 | Month    | Ad Spend | CAC   | New Customers | AOV   | New Cust Revenue |
 |----------|----------|-------|---------------|-------|-----------------|
-| Jan 2024 | $X       | $X    | X             | $X    | $X              |
-| Feb 2024 | $X       | $X    | X             | $X    | $X              |
-| ...      | ...      | ...   | ...           | ...   | ...             |
-| Dec 2025 | $X       | $X    | X             | $X    | $X              |
+| {first month} | $X   | $X    | X             | $X    | $X              |
+| ...           | ...  | ...   | ...           | ...   | ...             |
+| {last month}  | $X   | $X    | X             | $X    | $X              |
 ```
 
 Check for:
@@ -374,7 +385,7 @@ Check for:
 
 **Then ask the user:**
 
-> "Historicals are populated. For the forecast months (Jan 2026 onward, column Z+), I need monthly ad spend targets. Options:
+> "Historicals are populated. For the forecast months (first empty column onward), I need monthly ad spend targets. Options:
 > 1. **Flat spend** — same amount every month (tell me the number)
 > 2. **Growth trajectory** — start at $X/month and grow Y% monthly
 > 3. **Custom** — you specify each month's spend
@@ -388,7 +399,7 @@ Once the user provides ad spend targets for forecast months:
 **Write forecast ad spend:**
 ```
 Call mcp__claude_ai_gsheets-mcp__write_range
-  spreadsheet_id: "1K2N8zasZG1mRf_ZVisZlhuQfuwsro4eRyDLc-OEuzL8"
+  spreadsheet_id: "{SPREADSHEET_ID}"
   range: "New_Customer_Forecast_v2!Z31:{end_col}31"
   values: [[{month1_spend}, {month2_spend}, ...]]
 ```
@@ -437,4 +448,4 @@ After completing all steps, verify:
 - **Date matching uses MONTH() and YEAR() on the Week Start column** — this correctly aggregates weekly data to monthly
 - **The inflator table is an assumption** — present it to the user and let them adjust before building forecast formulas that reference it
 - **Row 36 (revenue) already has formulas** — do NOT overwrite it. If it's blank, it should be `=row33 * row34`
-- **Forecast months start at column Z** — columns B–Y are historicals only
+- **Forecast months start after the last historical column** — read row 29 dates to determine the boundary
