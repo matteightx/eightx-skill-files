@@ -351,9 +351,9 @@ Call mcp__claude_ai_gsheets-mcp__write_range
   valueInputOption: "USER_ENTERED"
 ```
 
-### Step 10: Review & Forecast Discussion
+### Step 10: Review Historicals & Get Revenue Target
 
-After all historicals are populated, verify and present results.
+After all historicals are populated, verify and present results, then ask for the revenue target.
 
 **Verify — read back the populated rows:**
 ```
@@ -385,33 +385,77 @@ Check for:
 
 **Then ask the user:**
 
-> "Historicals are populated. For the forecast months (first empty column onward), I need monthly ad spend targets. Options:
-> 1. **Flat spend** — same amount every month (tell me the number)
-> 2. **Growth trajectory** — start at $X/month and grow Y% monthly
-> 3. **Custom** — you specify each month's spend
+> "Historicals are populated. What's the **new customer revenue target** for the forecast year? I'll back-calculate the monthly ad spend needed to hit it.
 >
-> Once ad spend is entered, the CAC/customers/AOV/revenue formulas will auto-calculate using the seasonal indices and inflator table.
+> I can also work with:
+> - A **total annual revenue target** (e.g., '$2M from new customers this year')
+> - A **monthly target** (e.g., '$150K/month growing 10% monthly')
+> - A **growth rate** off the last historical month (e.g., '20% YoY growth')
 >
-> What approach do you want?"
+> What are you targeting?"
 
-Once the user provides ad spend targets for forecast months:
+### Step 10.1: Back-Calculate Ad Spend from Revenue Target
 
-**Write forecast ad spend:**
+Once the user provides a revenue target, reverse-engineer the monthly ad spend.
+
+**Back-calculation logic for each forecast month:**
+
+```
+1. Determine monthly revenue allocation:
+   - If annual target: distribute across months using AOV seasonal index
+     as a proxy for demand seasonality
+     Month_Revenue_Share(M) = AOV_Index(M) / SUM(all forecast month AOV indices)
+     Month_Revenue(M) = Annual_Target × Month_Revenue_Share(M)
+   - If monthly target with growth: apply the growth rate month over month
+   - If flat monthly target: use the same number each month
+
+2. For each forecast month M, solve for ad spend:
+   Seasonal_AOV(M) = Base_AOV × AOV_Index(M)
+   Needed_New_Customers(M) = Month_Revenue(M) / Seasonal_AOV(M)
+   Seasonal_CAC(M) = Base_CAC × CAC_Index(M)
+
+   Now account for the spend-level inflator (iterative):
+   - Start with: Est_Ad_Spend = Needed_New_Customers(M) × Seasonal_CAC(M)
+   - Look up which inflator tier Est_Ad_Spend falls into
+   - Adjusted_CAC = Seasonal_CAC(M) × Inflator
+   - Adjusted_Ad_Spend = Needed_New_Customers(M) × Adjusted_CAC
+   - Re-check the tier — if it changed, iterate once more (typically converges in 1–2 rounds)
+   - Final_Ad_Spend(M) = Adjusted_Ad_Spend
+```
+
+**Present the plan to the user before writing:**
+```
+Revenue Target: ${annual_target} for {year}
+
+| Month | Target Revenue | Needed Customers | Seasonal CAC | Ad Spend Required |
+|-------|---------------|-----------------|-------------|------------------|
+| Jan   | $X            | X               | $X          | $X               |
+| ...   | ...           | ...             | ...         | ...              |
+| Dec   | $X            | X               | $X          | $X               |
+| TOTAL | ${annual_target} | X            | —           | $X               |
+
+Total ad spend required: ${total_ad_spend}
+Blended CAC: ${total_ad_spend / total_customers}
+Blended ROAS (new customer only): ${annual_target / total_ad_spend}x
+```
+
+Ask: "Does this ad spend plan look reasonable? Want to adjust the revenue target or any assumptions before I write it?"
+
+### Step 10.2: Write Forecast Formulas
+
+Once the user confirms:
+
+**Write forecast ad spend (calculated values):**
 ```
 Call mcp__claude_ai_gsheets-mcp__write_range
   spreadsheet_id: "{SPREADSHEET_ID}"
-  range: "New_Customer_Forecast_v2!Z31:{end_col}31"
+  range: "New_Customer_Forecast_v2!{first_forecast_col}31:{last_forecast_col}31"
   values: [[{month1_spend}, {month2_spend}, ...]]
 ```
 
 **Write forecast CAC formulas** (using base CAC × seasonal index × spend inflator):
 ```
-For each forecast month column (Z, AA, AB, ...):
-=B11 * VLOOKUP(MONTH({col}29), $B$17:$M$18, 2, FALSE) * {inflator_lookup}
-```
-
-The exact inflator lookup formula:
-```
+For each forecast month column:
 =B11 * INDEX($B$18:$M$18, MATCH(MONTH({col}29), $B$17:$M$17, 0)) * INDEX($B$22:$B$26, MATCH(TRUE, $A$22:$A$26>={col}31, 0))
 ```
 
@@ -427,7 +471,83 @@ The exact inflator lookup formula:
 
 Row 36 (revenue) should auto-calculate from existing formulas (row 33 × row 34).
 
-**Present the projected new customer revenue** and offer to adjust assumptions.
+**Read back and present the final forecast:**
+```
+Call mcp__claude_ai_gsheets-mcp__batch_read
+  spreadsheet_id: "{SPREADSHEET_ID}"
+  ranges: [
+    "New_Customer_Forecast_v2!{first_forecast_col}29:{last_forecast_col}29",
+    "New_Customer_Forecast_v2!{first_forecast_col}31:{last_forecast_col}31",
+    "New_Customer_Forecast_v2!{first_forecast_col}32:{last_forecast_col}32",
+    "New_Customer_Forecast_v2!{first_forecast_col}33:{last_forecast_col}33",
+    "New_Customer_Forecast_v2!{first_forecast_col}34:{last_forecast_col}34",
+    "New_Customer_Forecast_v2!{first_forecast_col}36:{last_forecast_col}36"
+  ]
+```
+
+Present the projected new customer revenue and confirm it hits the target.
+
+### Step 11: Write Model Notes
+
+Write a summary of the model methodology, key statistics, and risks to a notes section in the spreadsheet. This documents what was done so anyone reviewing the sheet later understands the assumptions.
+
+**First, read to find where notes should go:**
+```
+Call mcp__claude_ai_gsheets-mcp__read_range
+  spreadsheet_id: "{SPREADSHEET_ID}"
+  range: "New_Customer_Forecast_v2!A38:B50"
+```
+
+If there's an existing notes section, write there. If row 38 is "RETURNING CUSTOMER REVENUE", place notes starting at **row 42** (or the first empty row after any existing content). Use column A for labels and column B onward for the note text.
+
+**Notes content to write:**
+
+```
+Row: MODEL NOTES — Generated {today's date}
+Row: (blank)
+Row: METHODOLOGY
+Row: - Base CAC: Weighted average of last 3 months of funnel data (${base_cac})
+Row: - Base AOV: Weighted average of last 3 months of funnel data (${base_aov})
+Row: - Seasonal indices: Calculated from {X} months of historical weekly data ({date_range})
+Row: - CAC inflator: {X}-tier diminishing returns model (1.00x at base spend → {max_inflator}x at {max_tier_pct}% of base)
+Row: - Revenue target: ${annual_target} annual new customer revenue for {year}
+Row: - Ad spend back-calculated from revenue target using seasonal CAC/AOV × inflator
+Row: (blank)
+Row: KEY STATISTICS
+Row: - Historical data: {X} weeks across {X} months ({start_date} – {end_date})
+Row: - Historical avg monthly ad spend: ${X}
+Row: - Historical avg CAC: ${X} | Range: ${min} – ${max}
+Row: - Historical avg AOV: ${X} | Range: ${min} – ${max}
+Row: - Historical avg monthly new customers: {X}
+Row: - CAC coefficient of variation: {X}% (higher = less predictable)
+Row: - AOV coefficient of variation: {X}% (higher = less predictable)
+Row: (blank)
+Row: KEY RISKS & CAVEATS
+Row: - {risk_1: e.g., "CAC has been trending upward — base CAC may underestimate future costs if trend continues"}
+Row: - {risk_2: e.g., "Only 2 years of seasonal data — indices may not capture unusual years"}
+Row: - {risk_3: e.g., "Inflator curve is assumed, not measured — actual diminishing returns may differ"}
+Row: - {risk_4: e.g., "AOV seasonality assumes similar product mix year-over-year"}
+Row: - {risk_5: any client-specific risk observed in the data, e.g., "Q3 data shows a gap — possible tracking issue"}
+Row: - New customer revenue only — does not include returning customer revenue or LTV
+Row: - Model assumes stable conversion funnel structure (same platforms, similar creative quality)
+```
+
+**Analyze the data to generate specific risks.** Don't use generic placeholders — look at the actual data for:
+- Trends (is CAC rising or falling over time?)
+- Volatility (high month-to-month variance = higher risk)
+- Data gaps (any months with zero or suspiciously low data?)
+- Seasonality strength (are the indices tight around 1.0 or wildly spread?)
+- Recency bias (are the last 3 months representative or anomalous?)
+
+**Write the notes:**
+```
+Call mcp__claude_ai_gsheets-mcp__write_range
+  spreadsheet_id: "{SPREADSHEET_ID}"
+  range: "New_Customer_Forecast_v2!A{notes_start_row}:A{notes_end_row}"
+  values: [["{line_1}"], ["{line_2}"], ...]
+```
+
+**Tell the user:** "Model notes written to the spreadsheet starting at row {X}. Includes methodology, key statistics, and {N} specific risks identified from the data."
 
 ## Verification Checklist
 
@@ -441,6 +561,8 @@ After completing all steps, verify:
 - [ ] Revenue in row 36 = row 33 × row 34
 - [ ] No #N/A, #REF!, or #DIV/0! errors in the historical range
 - [ ] Forecast formulas chain correctly when ad spend is entered
+- [ ] Forecast revenue total approximately matches the user's stated target
+- [ ] Model notes are written with real data-specific observations, not generic placeholders
 
 ## Important Notes
 
@@ -449,3 +571,5 @@ After completing all steps, verify:
 - **The inflator table is an assumption** — present it to the user and let them adjust before building forecast formulas that reference it
 - **Row 36 (revenue) already has formulas** — do NOT overwrite it. If it's blank, it should be `=row33 * row34`
 - **Forecast months start after the last historical column** — read row 29 dates to determine the boundary
+- **Back-calculation is iterative** — the spend-level inflator means CAC depends on spend, which depends on CAC. Converge in 1–2 iterations.
+- **Notes must be data-specific** — analyze trends, volatility, and gaps in the actual data. Never write generic boilerplate risks.
