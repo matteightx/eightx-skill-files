@@ -491,21 +491,14 @@ Present the projected new customer revenue and confirm it hits the target.
 
 Write a summary of the model methodology, key statistics, and risks to a notes section in the spreadsheet. This documents what was done so anyone reviewing the sheet later understands the assumptions.
 
-**First, read to find where notes should go:**
-```
-Call mcp__claude_ai_gsheets-mcp__read_range
-  spreadsheet_id: "{SPREADSHEET_ID}"
-  range: "New_Customer_Forecast_v2!A38:B50"
-```
-
-If there's an existing notes section, write there. If row 38 is "RETURNING CUSTOMER REVENUE", place notes starting at **row 42** (or the first empty row after any existing content). Use column A for labels and column B onward for the note text.
+Write notes starting at **row 5** in column A, directly below the existing notes section header.
 
 **Notes content to write:**
 
 ```
-Row: MODEL NOTES — Generated {today's date}
-Row: (blank)
-Row: METHODOLOGY
+Row 5: MODEL NOTES — Generated {today's date}
+Row 6: (blank)
+Row 7: METHODOLOGY
 Row: - Base CAC: Weighted average of last 3 months of funnel data (${base_cac})
 Row: - Base AOV: Weighted average of last 3 months of funnel data (${base_aov})
 Row: - Seasonal indices: Calculated from {X} months of historical weekly data ({date_range})
@@ -543,11 +536,11 @@ Row: - Model assumes stable conversion funnel structure (same platforms, similar
 ```
 Call mcp__claude_ai_gsheets-mcp__write_range
   spreadsheet_id: "{SPREADSHEET_ID}"
-  range: "New_Customer_Forecast_v2!A{notes_start_row}:A{notes_end_row}"
+  range: "New_Customer_Forecast_v2!A5"
   values: [["{line_1}"], ["{line_2}"], ...]
 ```
 
-**Tell the user:** "Model notes written to the spreadsheet starting at row {X}. Includes methodology, key statistics, and {N} specific risks identified from the data."
+**Tell the user:** "Model notes written to the spreadsheet starting at row 5. Includes methodology, key statistics, and {N} specific risks identified from the data."
 
 ## Verification Checklist
 
